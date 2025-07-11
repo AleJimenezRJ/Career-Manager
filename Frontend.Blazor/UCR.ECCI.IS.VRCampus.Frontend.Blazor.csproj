@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Frontend.Blazor.Client\UCR.ECCI.IS.VRCampus.Frontend.Blazor.Client.csproj" />
+		<ProjectReference Include="..\Frontend.Blazor.DependencyInjection\UCR.ECCI.IS.VRCampus.Frontend.Blazor.DependencyInjection.csproj" />
+		<ProjectReference Include="..\Frontend.Blazor.Presentation\UCR.ECCI.IS.VRCampus.Frontend.Blazor.Presentation.csproj" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.14" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.5" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.5" />
+		<PackageReference Include="Microsoft.Identity.Web" Version="3.9.4" />
+		<PackageReference Include="Microsoft.Identity.Web.DownstreamApi" Version="3.9.4" />
+		<PackageReference Include="MudBlazor" Version="8.6.0" />
+	</ItemGroup>
+
+
+</Project>

@@ -1,0 +1,302 @@
+﻿@page "/"
+@using UCR.ECCI.IS.VRCampus.Frontend.Blazor.Application.Services
+@using UCR.ECCI.IS.VRCampus.Frontend.Blazor.Domain.Entities
+@using UCR.ECCI.IS.VRCampus.Frontend.Blazor.Presentation.Components
+@using MudBlazor
+@using Microsoft.AspNetCore.Components.Web
+@inject ICareerServices CareerService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Career Management System</PageTitle>
+
+<!-- Hero Section -->
+<MudPaper Class="pa-8 mb-8" Style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 20px; position: relative; overflow: hidden;">
+    <div style="position: absolute; top: 0; right: 0; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; transform: translate(50%, -50%);"></div>
+    <div style="position: relative; z-index: 1;">
+        <MudGrid AlignItems="Center">
+            <MudItem xs="12" md="8">
+                <MudText Typo="Typo.h2" Style="font-weight: 700; margin-bottom: 16px; background: linear-gradient(45deg, #ffffff, #f0f0f0); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    Career Management System
+                </MudText>
+                <MudText Typo="Typo.h6" Style="opacity: 0.9; margin-bottom: 24px; font-weight: 400;">
+                    Discover, manage, and explore career opportunities with our comprehensive platform
+                </MudText>
+                <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Surface"
+                               StartIcon="@Icons.Material.Filled.Add"
+                               Style="background: rgba(255,255,255,0.2); color: white; border-radius: 12px; text-transform: none; font-weight: 600; padding: 12px 24px; backdrop-filter: blur(10px);"
+                               OnClick="@GoToAddCareer">
+                        Add New Career
+                    </MudButton>
+                </div>
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <div style="text-align: center;">
+                    <MudIcon Icon="@Icons.Material.Filled.School" Style="font-size: 120px; opacity: 0.3;" />
+                </div>
+            </MudItem>
+        </MudGrid>
+    </div>
+</MudPaper>
+
+<!-- Search and Filter Section -->
+<MudPaper Class="pa-6 mb-6" Style="border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.08); border: 1px solid #f0f0f0;">
+    <MudGrid AlignItems="Center" Spacing="3">
+        <MudItem xs="12" md="6">
+            <MudTextField @bind-Value="_searchCareerName"
+                          Placeholder="Search for a specific career..."
+                          Variant="Variant.Outlined"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Immediate="true"
+                          OnKeyDown="HandleEnterKey"
+                          Style="border-radius: 12px;"
+                          FullWidth="true" />
+        </MudItem>
+        <MudItem xs="12" md="3">
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Search"
+                       Style="border-radius: 12px; text-transform: none; font-weight: 500; height: 56px; width: 100%;"
+                       OnClick="GoToSpecificCareer">
+                Search Career
+            </MudButton>
+        </MudItem>
+        <MudItem xs="12" md="3">
+            <MudTextField @bind-Value="_keywordSearch"
+                          Placeholder="Keyword search..."
+                          Variant="Variant.Outlined"
+                          Adornment="Adornment.End"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          AdornmentColor="Color.Primary"
+                          OnKeyDown="HandleKeywordEnterKey"
+                          Style="border-radius: 12px;"
+                          FullWidth="true" />
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+
+<!-- Career List Section -->
+<MudPaper Class="pa-6" Style="border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.08); border: 1px solid #f0f0f0;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div>
+            <MudText Typo="Typo.h4" Style="color: #2c3e50; font-weight: 600; margin-bottom: 4px;">
+                Available Careers
+            </MudText>
+            <MudText Typo="Typo.body2" Style="color: #7f8c8d;">
+                @if (careers?.Any() == true)
+                {
+                    <span>@careers.Count() career(s) available</span>
+                }
+                else
+                {
+                    <span>No careers available</span>
+                }
+            </MudText>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 12px; background: #e3f2fd; border: 1px solid #90caf9;">
+            <MudIcon Icon="@Icons.Material.Filled.Update" Style="font-size: 18px; color: #1976d2;" />
+            <MudText Typo="Typo.body2" Style="color: #1976d2; font-weight: 500;">
+                Last Updated: @DateTime.Now.ToString("MMM dd, yyyy")
+            </MudText>
+        </div>
+    </div>
+
+    @if (careers == null)
+    {
+        <div style="text-align: center; padding: 60px 20px;">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
+            <MudText Typo="Typo.h6" Style="margin-top: 24px; color: #7f8c8d;">Loading careers...</MudText>
+        </div>
+    }
+    else if (!careers.Any())
+    {
+        <div style="text-align: center; padding: 60px 20px;">
+            <MudIcon Icon="@Icons.Material.Filled.School" Style="font-size: 80px; color: #ddd; margin-bottom: 24px;" />
+            <MudText Typo="Typo.h5" Style="color: #7f8c8d; margin-bottom: 12px;">No careers found</MudText>
+            <MudText Typo="Typo.body1" Style="color: #95a5a6; margin-bottom: 24px;">
+                Start building your career database by adding your first career
+            </MudText>
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       Style="border-radius: 12px; text-transform: none; font-weight: 600;"
+                       OnClick="@GoToAddCareer">
+                Add Your First Career
+            </MudButton>
+        </div>
+    }
+    else
+    {
+        <MudGrid Spacing="4">
+            @foreach (var career in careers)
+            {
+                <MudItem xs="12" md="6" lg="4">
+                    <MudCard Style="height: 100%; border-radius: 16px; border: 1px solid #f0f0f0; transition: all 0.3s ease; cursor: pointer;"
+                             @onclick="@(() => GoToCareerDetail(career.Name?.Name))">
+                        <MudCardHeader Style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 16px 16px 0 0;">
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6" Style="color: #2c3e50; font-weight: 600; margin-bottom: 8px;">
+                                    @career.Name?.Name
+                                </MudText>
+                                <div style="display: inline-block; padding: 4px 12px; border-radius: 8px; background: #1976d2; color: white; font-size: 0.75rem; font-weight: 500;">
+                                    @career.Modality?.Value
+                                </div>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent Style="padding: 20px;">
+                            <MudText Typo="Typo.body2" Style="color: #6c757d; line-height: 1.6; margin-bottom: 16px;">
+                                @(career.Description?.Content?.Length > 120 ?
+                                                        career.Description.Content.Substring(0, 120) + "..." :
+                                                        career.Description?.Content)
+                    </MudText>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <MudText Typo="Typo.caption" Style="color: #95a5a6; margin-bottom: 4px;">
+                                Duration
+                            </MudText>
+                            <MudText Typo="Typo.subtitle2" Style="color: #2c3e50; font-weight: 600;">
+                                @career.SemestersNumber?.Number semesters
+                            </MudText>
+                        </div>
+                        <div style="text-align: right;">
+                            <MudText Typo="Typo.caption" Style="color: #95a5a6; margin-bottom: 4px;">
+                                Type
+                            </MudText>
+                            <div style="display: inline-block; padding: 4px 12px; border-radius: 8px; background: @((bool)career.IsSteam! ? "#4caf50" : "#2196f3"); color: white; font-size: 0.75rem; font-weight: 500;">
+                                @((bool)career.IsSteam! ? "STEAM" : "Regular")
+                            </div>
+                        </div>
+                    </div>
+                </MudCardContent>
+                <MudCardActions Style="padding: 16px 20px; border-top: 1px solid #f0f0f0;">
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.RemoveRedEye"
+                               Style="text-transform: none; font-weight: 500;"
+                               OnClick="@(() => GoToCareerDetail(career.Name?.Name))">
+                        View Details
+                    </MudButton>
+                    <MudSpacer />
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+                }
+        </MudGrid>
+    }
+</MudPaper>
+
+<!-- Keyword Search Dialog -->
+<MudDialog @bind-IsVisible="_showKeywordDialog" Options="new DialogOptions { CloseOnEscapeKey = true }">
+    <DialogContent>
+        <div style="text-align: center; padding: 20px;">
+            <MudIcon Icon="@Icons.Material.Filled.Search" Style="font-size: 48px; color: #55efc4; margin-bottom: 16px;" />
+            <MudText Typo="Typo.h5" Style="margin-bottom: 16px; color: #2c3e50;">Keyword Search</MudText>
+            <MudTextField @bind-Value="_keywordDialogSearch"
+                          Label="Search Keyword"
+                          Placeholder="Enter keyword to search..."
+                          Variant="Variant.Outlined"
+                          FullWidth="true"
+                          Style="margin-bottom: 16px;" />
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => _showKeywordDialog = false)">Cancel</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="@SearchKeywordFromDialog">
+            Search
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private IEnumerable<Career>? careers;
+    private string _searchCareerName = string.Empty;
+    private string _keywordSearch = string.Empty;
+    private string _keywordDialogSearch = string.Empty;
+    private bool _showKeywordDialog = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCareers();
+    }
+
+    private async Task LoadCareers()
+    {
+        try
+        {
+            careers = await CareerService.ListCareersAsync();
+        }
+        catch (Exception)
+        {
+            careers = Enumerable.Empty<Career>();
+        }
+    }
+
+    private async Task RefreshCareers()
+    {
+        careers = null;
+        StateHasChanged();
+        await LoadCareers();
+    }
+
+    private void GoToAddCareer()
+    {
+        NavigationManager.NavigateTo("/careers/add");
+    }
+
+    private void GoToSpecificCareer()
+    {
+        if (!string.IsNullOrWhiteSpace(_searchCareerName))
+        {
+            var encoded = Uri.EscapeDataString(_searchCareerName.Trim());
+            NavigationManager.NavigateTo($"/careers/list-specific-career/{encoded}");
+        }
+    }
+
+    private void GoToCareerDetail(string? careerName)
+    {
+        if (!string.IsNullOrWhiteSpace(careerName))
+        {
+            var encoded = Uri.EscapeDataString(careerName.Trim());
+            NavigationManager.NavigateTo($"/careers/list-specific-career/{encoded}");
+        }
+    }
+
+
+    private async Task SearchKeywordFromDialog()
+    {
+        if (!string.IsNullOrWhiteSpace(_keywordDialogSearch))
+        {
+            try
+            {
+                var results = await CareerService.SearchKeywordAsync(_keywordDialogSearch);
+
+            }
+            catch (Exception)
+            {
+                // Handle error
+            }
+            _showKeywordDialog = false;
+            _keywordDialogSearch = string.Empty;
+        }
+    }
+
+    private void HandleEnterKey(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            GoToSpecificCareer();
+        }
+    }
+
+    private void HandleKeywordEnterKey(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter" && !string.IsNullOrWhiteSpace(_keywordSearch))
+        {
+            var encoded = Uri.EscapeDataString(_keywordSearch.Trim());
+            NavigationManager.NavigateTo($"/careers/search/{encoded}");
+        }
+    }
+}

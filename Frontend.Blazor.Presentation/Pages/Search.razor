@@ -1,0 +1,302 @@
+﻿@page "/careers/search/{keyword}"
+@using UCR.ECCI.IS.VRCampus.Frontend.Blazor.Application.Services
+@using UCR.ECCI.IS.VRCampus.Frontend.Blazor.Domain.Entities
+@using UCR.ECCI.IS.VRCampus.Frontend.Blazor.Presentation.Components
+@using MudBlazor
+@using Microsoft.AspNetCore.Components.Web
+@inject ICareerServices CareerService
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+
+<PageTitle>Search Results: @Keyword - Career Management System</PageTitle>
+
+@if (searchResults == null && !_isLoading)
+{
+    <!-- No Results Found Section -->
+    <MudPaper Class="pa-8 mb-8" Style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; border-radius: 20px; position: relative; overflow: hidden;">
+        <div style="position: absolute; top: 0; right: 0; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; transform: translate(50%, -50%);"></div>
+        <div style="position: relative; z-index: 1; text-align: center;">
+            <MudIcon Icon="@Icons.Material.Filled.SearchOff" Style="font-size: 80px; margin-bottom: 24px; opacity: 0.9;" />
+            <MudText Typo="Typo.h3" Style="font-weight: 700; margin-bottom: 16px;">
+                No Results Found
+            </MudText>
+            <MudText Typo="Typo.h6" Style="opacity: 0.9; margin-bottom: 24px;">
+                No careers found matching "@Keyword"
+            </MudText>
+            <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Surface"
+                           StartIcon="@Icons.Material.Filled.ArrowBack"
+                           Style="background: rgba(255,255,255,0.2); color: white; border-radius: 12px; text-transform: none; font-weight: 600; padding: 12px 24px; backdrop-filter: blur(10px);"
+                           OnClick="GoBack">
+                    Back to Home
+                </MudButton>
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Surface"
+                           StartIcon="@Icons.Material.Filled.Search"
+                           Style="border-color: rgba(255,255,255,0.3); color: white; border-radius: 12px; text-transform: none; font-weight: 600; padding: 12px 24px;"
+                           OnClick="@(() => _showSearchDialog = true)">
+                    Try Another Search
+                </MudButton>
+            </div>
+        </div>
+    </MudPaper>
+}
+else if (_isLoading)
+{
+    <!-- Loading Section -->
+    <MudPaper Class="pa-8 mb-8" Style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 20px;">
+        <div style="text-align: center; padding: 40px;">
+            <MudProgressCircular Color="Color.Surface" Indeterminate="true" Size="Size.Large" />
+            <MudText Typo="Typo.h6" Style="margin-top: 24px; opacity: 0.9;">Searching for "@Keyword"...</MudText>
+        </div>
+    </MudPaper>
+}
+else
+{
+    <!-- Search Results Header Section -->
+    <MudPaper Class="pa-8 mb-8" Style="background: linear-gradient(135deg, #55efc4 0%, #00cec9 100%); color: white; border-radius: 20px; position: relative; overflow: hidden;">
+        <div style="position: absolute; top: 0; right: 0; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; transform: translate(50%, -50%);"></div>
+        <div style="position: relative; z-index: 1;">
+            <MudGrid AlignItems="Center">
+                <MudItem xs="12" md="8">
+                    <MudText Typo="Typo.h3" Style="font-weight: 700; margin-bottom: 16px; background: linear-gradient(45deg, #ffffff, #f0f0f0); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        Search Results
+                    </MudText>
+                    <MudText Typo="Typo.h6" Style="opacity: 0.9; margin-bottom: 8px;">
+                        Results for: "@Keyword"
+                    </MudText>
+                    <div style="display: inline-block; padding: 8px 16px; border-radius: 12px; background: rgba(255,255,255,0.2); color: white; font-size: 0.9rem; font-weight: 500; backdrop-filter: blur(10px); margin-bottom: 24px;">
+                        @searchResults.Count() result(s) found
+                    </div>
+                    <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Surface"
+                                   StartIcon="@Icons.Material.Filled.ArrowBack"
+                                   Style="background: rgba(255,255,255,0.2); color: white; border-radius: 12px; text-transform: none; font-weight: 600; padding: 12px 24px; backdrop-filter: blur(10px);"
+                                   OnClick="GoBack">
+                            Back to Home
+                        </MudButton>
+                    </div>
+                </MudItem>
+                <MudItem xs="12" md="4">
+                    <div style="text-align: center;">
+                        <MudIcon Icon="@Icons.Material.Filled.ManageSearch" Style="font-size: 120px; opacity: 0.3;" />
+                    </div>
+                </MudItem>
+            </MudGrid>
+        </div>
+    </MudPaper>
+
+    <!-- Search Results Section -->
+    <MudPaper Class="pa-6" Style="border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.08); border: 1px solid #f0f0f0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <div>
+                <MudText Typo="Typo.h4" Style="color: #2c3e50; font-weight: 600; margin-bottom: 4px;">
+                    Search Results
+                </MudText>
+                <MudText Typo="Typo.body2" Style="color: #7f8c8d;">
+                    Found @searchResults.Count() matching result(s) for "@Keyword"
+                </MudText>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 12px; background: #e8f5e8; border: 1px solid #4caf50;">
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Style="font-size: 18px; color: #4caf50;" />
+                <MudText Typo="Typo.body2" Style="color: #4caf50; font-weight: 500;">
+                    Search Completed
+                </MudText>
+            </div>
+        </div>
+
+        @if (searchResults.Any())
+        {
+            <MudGrid Spacing="4">
+                @foreach (var result in searchResults)
+                {
+                    <MudItem xs="12" md="6" lg="4">
+                        <MudCard Style="height: 100%; border-radius: 16px; border: 1px solid #f0f0f0; transition: all 0.3s ease; cursor: pointer; position: relative; overflow: hidden;"
+                                 @onclick="@(() => GoToCareerDetail(result.CareerName))">
+
+                            <!-- Match indicator -->
+                            <div style="position: absolute; top: 16px; right: 16px; z-index: 2;">
+                                <div style="display: inline-block; padding: 4px 8px; border-radius: 8px; background: #4caf50; color: white; font-size: 0.7rem; font-weight: 600;">
+                                    MATCH
+                                </div>
+                            </div>
+
+                            <MudCardHeader Style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 16px 16px 0 0; padding-right: 80px;">
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.h6" Style="color: #2c3e50; font-weight: 600; margin-bottom: 8px;">
+                                        @result.CareerName
+                                    </MudText>
+                                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                        <div style="display: inline-block; padding: 4px 8px; border-radius: 6px; background: #e3f2fd; color: #1976d2; font-size: 0.7rem; font-weight: 500;">
+                                            @result.TableName
+                                        </div>
+                                        <div style="display: inline-block; padding: 4px 8px; border-radius: 6px; background: #fff3e0; color: #f57c00; font-size: 0.7rem; font-weight: 500;">
+                                            @result.ColumnName
+                                        </div>
+                                    </div>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+
+                            <MudCardContent Style="padding: 20px;">
+                                <div style="margin-bottom: 16px;">
+                                    <MudText Typo="Typo.caption" Style="color: #95a5a6; font-weight: 500; margin-bottom: 8px;">
+                                        MATCHED CONTENT
+                                    </MudText>
+                                    <MudText Typo="Typo.body2" Style="color: #495057; line-height: 1.6; padding: 12px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #4caf50;">
+                                        @(result.Field?.Length > 150 ? result.Field.Substring(0, 150) + "..." : result.Field)
+                                    </MudText>
+                                </div>
+                            </MudCardContent>
+
+                            <MudCardActions Style="padding: 16px 20px; border-top: 1px solid #f0f0f0;">
+                                <MudButton Variant="Variant.Text"
+                                           Color="Color.Primary"
+                                           StartIcon="@Icons.Material.Filled.RemoveRedEye"
+                                           Style="text-transform: none; font-weight: 500;"
+                                           OnClick="@(() => GoToCareerDetail(result.CareerName))">
+                                    View Career
+                                </MudButton>
+                                <MudSpacer />
+                                <MudButton Variant="Variant.Text"
+                                           Color="Color.Secondary"
+                                           StartIcon="@Icons.Material.Filled.Calculate"
+                                           Style="text-transform: none; font-weight: 500;"
+                                           OnClick="@(() => CalculateScholarship(result.CareerName))">
+                                    Calculate
+                                </MudButton>
+                            </MudCardActions>
+                        </MudCard>
+                    </MudItem>
+                }
+            </MudGrid>
+        }
+    </MudPaper>
+
+}
+
+<!-- New Search Dialog -->
+<MudDialog @bind-IsVisible="_showSearchDialog" Options="new DialogOptions { CloseOnEscapeKey = true }">
+    <DialogContent>
+        <div style="text-align: center; padding: 20px;">
+            <MudIcon Icon="@Icons.Material.Filled.ManageSearch" Style="font-size: 48px; color: #55efc4; margin-bottom: 16px;" />
+            <MudText Typo="Typo.h5" Style="margin-bottom: 16px; color: #2c3e50;">New Keyword Search</MudText>
+            <MudTextField @bind-Value="_newSearchKeyword"
+                          Label="Search Keyword"
+                          Placeholder="Enter keyword to search..."
+                          Variant="Variant.Outlined"
+                          FullWidth="true"
+                          OnKeyDown="HandleDialogEnterKey"
+                          Style="margin-bottom: 16px;" />
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => _showSearchDialog = false)">Cancel</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="@SearchFromDialog">
+            Search
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public string Keyword { get; set; } = string.Empty;
+    private IEnumerable<SearchResult>? searchResults;
+    private bool _isLoading = true;
+    private bool _showSearchDialog = false;
+    private string _newSearchKeyword = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSearchResults();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrEmpty(Keyword))
+        {
+            await LoadSearchResults();
+        }
+    }
+
+    private async Task LoadSearchResults()
+    {
+        try
+        {
+            _isLoading = true;
+            StateHasChanged();
+
+            var decodedKeyword = Uri.UnescapeDataString(Keyword);
+            searchResults = await CareerService.SearchKeywordAsync(decodedKeyword);
+
+            if (searchResults?.Any() != true)
+            {
+                Snackbar.Add($"No results found for '{decodedKeyword}'", Severity.Info);
+                searchResults = null;
+            }
+            else
+            {
+                Snackbar.Add($"Found {searchResults.Count()} result(s) for '{decodedKeyword}'", Severity.Success);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error searching for '{Keyword}': {ex.Message}", Severity.Error);
+            searchResults = null;
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+    private void GoToCareerDetail(string careerName)
+    {
+        if (!string.IsNullOrWhiteSpace(careerName))
+        {
+            var encoded = Uri.EscapeDataString(careerName.Trim());
+            NavigationManager.NavigateTo($"/careers/list-specific-career/{encoded}");
+        }
+    }
+
+    private async Task CalculateScholarship(string careerName)
+    {
+        if (!string.IsNullOrWhiteSpace(careerName))
+        {
+            try
+            {
+                await CareerService.CalculateScholarshipAsync(careerName);
+                Snackbar.Add($"Scholarship calculation completed for {careerName}", Severity.Success);
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error calculating scholarship: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private void SearchFromDialog()
+    {
+        if (!string.IsNullOrWhiteSpace(_newSearchKeyword))
+        {
+            var encoded = Uri.EscapeDataString(_newSearchKeyword.Trim());
+            NavigationManager.NavigateTo($"/careers/search/{encoded}");
+            _showSearchDialog = false;
+            _newSearchKeyword = string.Empty;
+        }
+    }
+
+    private void HandleDialogEnterKey(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+        {
+            SearchFromDialog();
+        }
+    }
+}

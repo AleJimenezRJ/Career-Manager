@@ -1,0 +1,13 @@
+﻿@using MudBlazor
+@* FluidContainer.razor *@
+<MudPaper Width="100%" Class="d-flex justify-center align-center">
+    <MudContainer MaxWidth="MaxWidth.Medium">
+        <MudPaper Width="100%" Class="pa-6" Elevation="0">
+            @ChildContent
+        </MudPaper>
+    </MudContainer>
+</MudPaper>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

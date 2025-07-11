@@ -1,0 +1,6 @@
+@UCR.ECCI.IS.VRCampus.Backend.Api_HostAddress = http://localhost:5255
+
+GET {{UCR.ECCI.IS.VRCampus.Backend.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

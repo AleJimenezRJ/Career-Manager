@@ -1,0 +1,328 @@
+@page "/careers/add"
+@using UCR.ECCI.IS.VRCampus.Frontend.Blazor.Application.Services
+@using UCR.ECCI.IS.VRCampus.Frontend.Blazor.Domain.Entities
+@using UCR.ECCI.IS.VRCampus.Frontend.Blazor.Domain.ValueObjects
+@using UCR.ECCI.IS.VRCampus.Frontend.Blazor.Presentation.Components
+@using MudBlazor
+@using Microsoft.AspNetCore.Components.Web
+@inject ICareerServices CareerService
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+
+<PageTitle>Add New Career</PageTitle>
+
+<!-- Hero Section -->
+<MudPaper Class="pa-8 mb-8" Style="background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%); color: white; border-radius: 20px; position: relative; overflow: hidden;">
+    <div style="position: absolute; top: 0; right: 0; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; transform: translate(50%, -50%);"></div>
+    <div style="position: relative; z-index: 1;">
+        <MudGrid AlignItems="Center">
+            <MudItem xs="12" md="8">
+                <MudText Typo="Typo.h2" Style="font-weight: 700; margin-bottom: 16px; background: linear-gradient(45deg, #ffffff, #f0f0f0); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    Add New Career
+                </MudText>
+                <MudText Typo="Typo.h6" Style="opacity: 0.9; margin-bottom: 24px; font-weight: 400;">
+                    Create a comprehensive career profile with all the essential details
+                </MudText>
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Surface"
+                           StartIcon="@Icons.Material.Filled.ArrowBack"
+                           Style="border-color: rgba(255,255,255,0.3); color: white; border-radius: 12px; text-transform: none; font-weight: 600; padding: 12px 24px;"
+                           OnClick="@GoBack">
+                    Back to Careers
+                </MudButton>
+            </MudItem>
+            <MudItem xs="12" md="4">
+                <div style="text-align: center;">
+                    <MudIcon Icon="@Icons.Material.Filled.Add" Style="font-size: 120px; opacity: 0.3;" />
+                </div>
+            </MudItem>
+        </MudGrid>
+    </div>
+</MudPaper>
+
+<!-- Form Section -->
+<MudPaper Class="pa-6" Style="border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.08); border: 1px solid #f0f0f0;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+        <div>
+            <MudText Typo="Typo.h4" Style="color: #2c3e50; font-weight: 600; margin-bottom: 4px;">
+                Career Information
+            </MudText>
+            <MudText Typo="Typo.body2" Style="color: #7f8c8d;">
+                Fill in the details below to create a new career profile
+            </MudText>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 12px; background: #e8f5e8; border: 1px solid #4caf50;">
+            <MudIcon Icon="@Icons.Material.Filled.Info" Style="font-size: 18px; color: #4caf50;" />
+            <MudText Typo="Typo.body2" Style="color: #4caf50; font-weight: 500;">
+                All fields are required
+            </MudText>
+        </div>
+    </div>
+
+    <MudForm @ref="_form" Model="_careerModel">
+        <MudGrid Spacing="4">
+            <!-- Career Name -->
+            <MudItem xs="12" md="6">
+                <MudCard Style="border-radius: 12px; border: 1px solid #f0f0f0; height: 100%;">
+                    <MudCardHeader Style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px 12px 0 0;">
+                        <CardHeaderContent>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <MudIcon Icon="@Icons.Material.Filled.School" Style="color: #667eea; font-size: 24px;" />
+                                <MudText Typo="Typo.h6" Style="color: #2c3e50; font-weight: 600;">
+                                    Basic Information
+                                </MudText>
+                            </div>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent Style="padding: 24px;">
+                        <MudTextField @bind-Value="_careerModel.Name"
+                                      For="@(() => _careerModel.Name)"
+                                      Label="Career Name"
+                                      Placeholder="e.g., Computer Science, Business Administration"
+                                      Variant="Variant.Outlined"
+                                      FullWidth="true"
+                                      Style="margin-bottom: 16px; border-radius: 8px;"
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.Title" />
+
+                        <MudSelect @bind-Value="_careerModel.DegreeTitle"
+                                   For="@(() => _careerModel.DegreeTitle)"
+                                   Label="Degree Title"
+                                   Placeholder="Select a degree title"
+                                   Variant="Variant.Outlined"
+                                   FullWidth="true"
+                                   Style="border-radius: 8px;"
+                                   AnchorOrigin="Origin.BottomCenter"
+                                   Adornment="Adornment.Start"
+                                   AdornmentIcon="@Icons.Material.Filled.EmojiEvents">
+
+                            <MudSelectItem Value="@("Associate")">Associate</MudSelectItem>
+                            <MudSelectItem Value="@("Diploma")">Diploma</MudSelectItem>
+                            <MudSelectItem Value="@("Technical")">Technical</MudSelectItem>
+                            <MudSelectItem Value="@("Bachelor")">Bachelor's</MudSelectItem>
+                            <MudSelectItem Value="@("Licentiate")">Licentiate</MudSelectItem>
+                            <MudSelectItem Value="@("Master")">Master's</MudSelectItem>
+                            <MudSelectItem Value="@("Doctorate")">Doctorate</MudSelectItem>
+                            <MudSelectItem Value="@("PhD")">PhD</MudSelectItem>
+                        </MudSelect>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+
+            <!-- Career Description -->
+            <MudItem xs="12" md="6">
+                <MudCard Style="border-radius: 12px; border: 1px solid #f0f0f0; height: 100%;">
+                    <MudCardHeader Style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px 12px 0 0;">
+                        <CardHeaderContent>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <MudIcon Icon="@Icons.Material.Filled.Description" Style="color: #2ecc71; font-size: 24px;" />
+                                <MudText Typo="Typo.h6" Style="color: #2c3e50; font-weight: 600;">
+                                    Description
+                                </MudText>
+                            </div>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent Style="padding: 24px;">
+                        <MudTextField @bind-Value="_careerModel.Description"
+                                      For="@(() => _careerModel.Description)"
+                                      Label="Career Description"
+                                      Placeholder="Provide a detailed description of the career program..."
+                                      Variant="Variant.Outlined"
+                                      Lines="6"
+                                      FullWidth="true"
+                                      Style="border-radius: 8px;" />
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+
+            <!-- Program Details -->
+            <MudItem xs="12" md="6">
+                <MudCard Style="border-radius: 12px; border: 1px solid #f0f0f0; height: 100%;">
+                    <MudCardHeader Style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px 12px 0 0;">
+                        <CardHeaderContent>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <MudIcon Icon="@Icons.Material.Filled.AccessTime" Style="color: #e74c3c; font-size: 24px;" />
+                                <MudText Typo="Typo.h6" Style="color: #2c3e50; font-weight: 600;">
+                                    Program Details
+                                </MudText>
+                            </div>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent Style="padding: 24px;">
+                        <MudNumericField @bind-Value="_careerModel.SemestersNumber"
+                                         For="@(() => _careerModel.SemestersNumber)"
+                                         Label="Number of Semesters"
+                                         Placeholder="e.g., 8, 10, 12"
+                                         Variant="Variant.Outlined"
+                                         Min="1"
+                                         Max="20"
+                                         FullWidth="true"
+                                         Style="margin-bottom: 16px; border-radius: 8px;" />
+
+                        <MudSelect @bind-Value="_careerModel.Modality"
+                                   For="@(() => _careerModel.Modality)"
+                                   Label="Modality"
+                                   Placeholder="Select modality"
+                                   Variant="Variant.Outlined"
+                                   FullWidth="true"
+                                   Style="border-radius: 8px;"
+                                   AnchorOrigin="Origin.BottomCenter">
+                            <MudSelectItem Value="@("Presential")">Presential</MudSelectItem>
+                            <MudSelectItem Value="@("Virtual")">Virtual</MudSelectItem>
+                            <MudSelectItem Value="@("Hybrid")">Hybrid</MudSelectItem>
+                        </MudSelect>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+
+            <!-- Career Type -->
+            <MudItem xs="12" md="6">
+                <MudCard Style="border-radius: 12px; border: 1px solid #f0f0f0; height: 100%;">
+                    <MudCardHeader Style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px 12px 0 0;">
+                        <CardHeaderContent>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <MudIcon Icon="@Icons.Material.Filled.Category" Style="color: #9b59b6; font-size: 24px;" />
+                                <MudText Typo="Typo.h6" Style="color: #2c3e50; font-weight: 600;">
+                                    Career Type
+                                </MudText>
+                            </div>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent Style="padding: 24px; display: flex; align-items: center; justify-content: center;">
+                        <div style="text-align: center;">
+                            <MudSwitch @bind-Value="_careerModel.IsSteam"
+                                       Label="@(_careerModel.IsSteam ? "STEAM Career" : "Regular Career")"
+                                       Color="Color.Success"
+                                       Size="Size.Large"
+                                       Style="margin-bottom: 16px;"
+                                       CheckedChanged="@OnSteamToggleChanged" />
+                            <MudText Typo="Typo.body2" Style="color: #7f8c8d;">
+                                @if (_careerModel.IsSteam)
+                                {
+                                    <span>Focused on STEAM areas</span>
+                                }
+                                else
+                                {
+                                    <span>This is a regular academic career program</span>
+                                }
+                            </MudText>                         
+                        </div>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 32px; padding-top: 24px; border-top: 1px solid #f0f0f0;">
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Default"
+                       StartIcon="@Icons.Material.Filled.Cancel"
+                       Style="border-radius: 12px; text-transform: none; font-weight: 500; padding: 12px 24px;"
+                       OnClick="@GoBack">
+                Cancel
+            </MudButton>
+
+            <div style="display: flex; gap: 12px;">
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Refresh"
+                           Style="border-radius: 12px; text-transform: none; font-weight: 500; padding: 12px 24px;"
+                           OnClick="@ResetForm">
+                    Reset Form
+                </MudButton>
+
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Success"
+                           StartIcon="@Icons.Material.Filled.Save"
+                           Style="border-radius: 12px; text-transform: none; font-weight: 600; padding: 12px 32px;"
+                           OnClick="@SaveCareer"
+                           Disabled="@_isLoading">
+                    @if (_isLoading)
+                    {
+                        <MudProgressCircular Color="Color.Default" Size="Size.Small" Indeterminate="true" />
+                        <span style="margin-left: 8px;">Saving...</span>
+                    }
+                    else
+                    {
+                        <span>Save Career</span>
+                    }
+                </MudButton>
+            </div>
+        </div>
+    </MudForm>
+</MudPaper>
+
+@code {
+    private MudForm _form = new();
+    private CareerFormModel _careerModel = new();
+    private bool _isLoading = false;
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+    private void ResetForm()
+    {
+        _careerModel = new CareerFormModel();
+        StateHasChanged();
+    }
+
+    private void OnSteamToggleChanged(bool value)
+    {
+        _careerModel.IsSteam = value;
+        StateHasChanged();
+    }
+
+    private async Task SaveCareer()
+    {
+        _isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            var career = new Career(
+                EntityName.FromDatabase(_careerModel.Name ?? ""),
+                Description.FromDatabase(_careerModel.Description ?? ""),
+                SemestersNumber.FromDatabase(_careerModel.SemestersNumber ?? 0),
+                Modality.FromDatabase(_careerModel.Modality ?? ""),
+                DegreeTitle.FromDatabase(_careerModel.DegreeTitle ?? ""),
+                _careerModel.IsSteam
+            );
+
+            var result = await CareerService.AddCareerAsync(career);
+
+            if (result.IsSuccess)
+            {
+                var message = _careerModel.IsSteam ? "STEAM career added successfully!" : "Regular career added successfully!";
+                Snackbar.Add(message, Severity.Success);
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                Snackbar.Add("Failed to add career. Please try again.", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Debug logging
+            Console.WriteLine($"Error saving career: {ex.Message}");
+            Snackbar.Add("An unexpected error occurred. Please try again later.", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    public class CareerFormModel
+    {
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+        public int? SemestersNumber { get; set; }
+        public string? Modality { get; set; }
+        public string? DegreeTitle { get; set; }
+        public bool IsSteam { get; set; } = false;
+    }
+}

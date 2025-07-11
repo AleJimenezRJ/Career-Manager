@@ -1,0 +1,1 @@
+kiota generate -l CSharp -c ApiClient -n UCR.ECCI.IS.VRCampus.Frontend.Blazor.Infrastructure.Kiota -o Frontend.Blazor.Infrastructure/Kiota --clean-output -d https://localhost:7196/swagger/v1/swagger.json
